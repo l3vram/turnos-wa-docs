@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>turnos-wa · Documentación de negocio</title>
+    <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<nav class="nav"><div class="nav-inner">
+    <a class="brand" href="index.html">turnos-wa</a>
+    <a href="capacidades.html">Qué hace</a>
+    <a class="active" href="negocio.html">Producto</a>
+    <a href="tecnica.html">Técnica</a>
+</div></nav>
+<div class="wrap">
+    <h1>Documentación de negocio</h1>
+    <p class="lead">Qué es el producto, a quién resuelve qué, cómo se cobra y dónde estamos parados.</p>
+
+    <h2>1. El producto</h2>
+    <p>Un asistente de <strong>reservas y turnos por WhatsApp</strong> para negocios con agenda. El cliente
+        final reserva conversando con un bot por WhatsApp (sin instalar nada) y el dueño administra toda su
+        agenda <strong>también por WhatsApp</strong> (sin panel ni planillas). Genérico por dentro, se
+        vende vertical por fuera ("turnos para peluquerías").</p>
+
+    <h2>2. El problema</h2>
+    <ul>
+        <li><strong>Ausencias (no-shows):</strong> el cliente saca turno y no aparece. Es plata perdida y
+            es cuantificable; el dueño lo siente en el bolsillo.</li>
+        <li><strong>Gestión de agenda manual:</strong> cuaderno, planilla o el WhatsApp desordenado del dueño.</li>
+        <li><strong>Fricción de las apps:</strong> las soluciones existentes hacen que el cliente baje una
+            app o entre a una web. En Argentina, todo pasa por WhatsApp.</li>
+    </ul>
+
+    <h2>3. Propuesta de valor</h2>
+    <p><em>"Dejá de perder clientes por ausencias. Tu negocio entero vive en WhatsApp: sin apps, sin
+        paneles, sin contraseñas."</em></p>
+    <ul>
+        <li>Reservas automáticas 24/7, conversando en lenguaje natural (rioplatense).</li>
+        <li><strong>Recordatorio 24h antes</strong> con botones — baja las ausencias.</li>
+        <li><strong>Seña opcional</strong> (anti no-show): el cliente deja un anticipo al reservar.</li>
+        <li>El dueño ve su agenda, mueve turnos, marca ausencias y configura todo por chat.</li>
+        <li><strong>Informe mensual</strong> con el % de ausentismo — el dato que demuestra el valor.</li>
+    </ul>
+    <p class="muted">Diferenciador vs. competidores (AgendaPro, Reservo, TurnoBoost): WhatsApp-first real
+        + cobro <strong>por negocio</strong> (no por profesional). Ventana de oportunidad ~12-18 meses.</p>
+
+    <h2>4. Mercado</h2>
+    <p><strong>Rubros de entrada:</strong> peluquería, barbería, estética (agenda estricta = dolor agudo).
+        <strong>Extensible</strong> a cualquier negocio de turnos (consultorios, manicura, spa).
+        <strong>Geografía:</strong> Argentina (luego UY/PY: solo timezone, moneda y MercadoPago local).</p>
+
+    <h2>5. Modelo de cobro</h2>
+    <table>
+        <tr><th>Concepto</th><th>Cómo funciona</th></tr>
+        <tr><td><strong>Suscripción del negocio</strong> (tu ingreso)</td>
+            <td>Trial 30 días → luego un <strong>link de pago mensual</strong> al dueño (a tu cuenta de
+                MercadoPago). Si no paga, 15 días de gracia y se pausa el servicio. Más simple y transparente
+                que el débito automático (que en AR rebota mucho).</td></tr>
+        <tr><td><strong>Seña del cliente</strong> (del negocio)</td>
+            <td>Opcional por negocio. El anticipo va a la cuenta del propio negocio. Es el principal
+                argumento anti-ausencias.</td></tr>
+    </table>
+    <p><strong>Precio sugerido:</strong> Profesional ~$15.000 ARS / Negocio ~$25.000 ARS, por negocio.
+        Ajuste trimestral por IPC. <strong>Costo dominante:</strong> la API de WhatsApp (templates utility
+        ~$0.026 c/u), no el LLM (~0.1%). La ventana de servicio de 24h iniciada por el cliente es gratis.</p>
+    <p class="muted"><strong>Break-even de infraestructura:</strong> 3-5 clientes. Para un sueldo digno:
+        ~100-150 clientes activos → realistamente 12-24 meses de tracción, no 6. Esperar 5-8% de churn
+        mensual; gestionar cobros fallidos.</p>
+
+    <h2>6. Onboarding</h2>
+    <ul>
+        <li><strong>Fase 1 (hoy) — concierge:</strong> el founder da de alta cada negocio desde el
+            <strong>panel de admin</strong> (rubro, número, MercadoPago, seña, textos) y conecta su WhatsApp
+            por coexistencia. Reemplaza el SQL manual.</li>
+        <li><strong>Fase 2 — self-service:</strong> Embedded Signup de Meta para que cada negocio conecte su
+            WhatsApp solo + panel por negocio con login por <em>magic link</em>. Requiere App Review +
+            Business Verification de Meta (trámite lento, se arranca el día 1).</li>
+    </ul>
+
+    <h2>7. Go-to-market</h2>
+    <p><strong>Canal principal: venta de calle</strong> (puerta a puerta a peluquerías/barberías) — el canal
+        probado. De apoyo: beta con red personal (testimonios), Instagram/Facebook Ads ("dejá de perder
+        clientes por ausencias"), contenido en grupos del rubro, referidos (mes gratis para ambos) y
+        partnerships con distribuidores de insumos de belleza.</p>
+    <div class="card"><strong>El verdadero cuello de botella es la distribución, no el producto.</strong>
+        Condición antes de escalar: tener 3-5 negocios beta comprometidos.</div>
+
+    <h2>8. Estado actual</h2>
+    <table>
+        <tr><th>Capacidad</th><th>Estado</th></tr>
+        <tr><td>Reservas por WhatsApp (cliente) + anti doble-reserva</td><td><span class="pill ok">listo</span></td></tr>
+        <tr><td>NLU rioplatense (entiende lenguaje natural, saludos, gracias)</td><td><span class="pill ok">listo</span></td></tr>
+        <tr><td>Modo dueño 100% por chat (agenda, semana en imagen, reservar, bloquear)</td><td><span class="pill ok">listo</span></td></tr>
+        <tr><td>Horarios configurables por chat (lenguaje natural)</td><td><span class="pill ok">listo</span></td></tr>
+        <tr><td>Recordatorio 24h + marcado de ausencias</td><td><span class="pill ok">listo</span></td></tr>
+        <tr><td>Informe mensual (métricas + Excel) on-demand y automático</td><td><span class="pill ok">listo</span></td></tr>
+        <tr><td>Seña del cliente (MercadoPago) — <em>verificada E2E con sandbox real</em></td><td><span class="pill ok">listo</span></td></tr>
+        <tr><td>Cobro mensual del servicio (link + gracia + baja)</td><td><span class="pill ok">listo</span> <small>(falta E2E real)</small></td></tr>
+        <tr><td>Textos configurables por negocio (catálogo)</td><td><span class="pill ok">listo</span></td></tr>
+        <tr><td>Panel de admin del founder</td><td><span class="pill ok">listo</span></td></tr>
+        <tr><td>Hardening (cifrado, backups, docs cerrables)</td><td><span class="pill ok">listo</span></td></tr>
+        <tr><td>Onboarding self-service (Embedded Signup) + panel por negocio</td><td><span class="pill todo">Fase 2</span></td></tr>
+        <tr><td>Rate-limit y monitoreo por tenant</td><td><span class="pill todo">Fase 2</span></td></tr>
+    </table>
+
+    <h2>9. Roadmap</h2>
+    <ul>
+        <li><strong>Ahora:</strong> conseguir los 3-5 betas y darlos de alta (concierge). Probar el cobro
+            mensual E2E. Aprobar templates utility en Meta (recordatorio, cobro).</li>
+        <li><strong>Siguiente:</strong> Embedded Signup + panel por negocio (self-service), reactivación de
+            clientes inactivos, analytics de horarios pico y no-shows.</li>
+        <li><strong>Más adelante:</strong> multi-profesional y multi-sede, localización UY/PY, segundo
+            recordatorio (2h) si los no-shows lo justifican.</li>
+    </ul>
+
+    <h2>10. Riesgos clave</h2>
+    <ul>
+        <li><strong>Distribución lenta</strong> sin un motor de adquisición sostenido.</li>
+        <li><strong>Churn</strong> de PyME argentina (cancela al primer mes flojo) + cobros fallidos.</li>
+        <li><strong>Dependencia de Meta</strong> (políticas, quality rating, baneo de número) → API oficial,
+            opt-in, número de respaldo.</li>
+        <li><strong>Founder único</strong> haciendo soporte + desarrollo + ventas + cobranzas.</li>
+    </ul>
+</div>
+</body>
+</html>

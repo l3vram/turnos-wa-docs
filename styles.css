@@ -1,0 +1,30 @@
+:root { --verde: #2e7d32; --tinta: #1f2328; --muted: #5b6470; --linea: #e6e8eb; --fondo: #fbfbfc; }
+* { box-sizing: border-box; }
+body { font-family: system-ui, -apple-system, Segoe UI, sans-serif; color: var(--tinta);
+    background: var(--fondo); line-height: 1.6; margin: 0; }
+.nav { background: #fff; border-bottom: 1px solid var(--linea); position: sticky; top: 0; z-index: 10; }
+.nav-inner { max-width: 900px; margin: 0 auto; padding: .8rem 1.2rem; display: flex; gap: 1.2rem; align-items: center; flex-wrap: wrap; }
+.nav a { color: var(--muted); text-decoration: none; font-size: .92rem; font-weight: 600; }
+.nav a.brand { color: var(--verde); font-weight: 800; margin-right: auto; }
+.nav a:hover, .nav a.active { color: var(--verde); }
+.wrap { max-width: 900px; margin: 0 auto; padding: 2rem 1.2rem 5rem; }
+h1 { font-size: 1.9rem; margin: .2rem 0 .4rem; }
+h2 { font-size: 1.3rem; margin: 2.4rem 0 .6rem; padding-top: .6rem; border-top: 2px solid var(--linea); }
+h3 { font-size: 1.05rem; margin: 1.4rem 0 .3rem; }
+.lead { color: var(--muted); font-size: 1.05rem; }
+code { background: #eef1f3; padding: .1rem .35rem; border-radius: 4px; font-size: .88em; }
+pre { background: #1f2328; color: #e6e8eb; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: .82rem; line-height: 1.5; }
+pre code { background: none; padding: 0; color: inherit; }
+table { border-collapse: collapse; width: 100%; margin: .8rem 0; font-size: .92rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--linea); vertical-align: top; }
+th { background: #f2f4f6; }
+.card { border: 1px solid var(--linea); border-radius: 10px; padding: 1rem 1.2rem; margin: .8rem 0; background: #fff; }
+.pill { display: inline-block; font-size: .72rem; font-weight: 700; padding: .12rem .5rem; border-radius: 10px; }
+.ok { background: #d7f0d8; color: #1b5e20; } .wip { background: #fff0cc; color: #8a6d00; } .todo { background: #ffe0e0; color: #a31515; }
+.hub { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem; }
+.hub a { text-decoration: none; color: inherit; }
+.hub .card { transition: border-color .15s; } .hub .card:hover { border-color: var(--verde); }
+.hub h3 { margin-top: 0; color: var(--verde); }
+.muted { color: var(--muted); } small { color: var(--muted); }
+ul { padding-left: 1.2rem; } li { margin: .2rem 0; }
+@media (max-width: 640px) { .hub { grid-template-columns: 1fr; } }

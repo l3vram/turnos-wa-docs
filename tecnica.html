@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>turnos-wa · Documentación técnica</title>
+    <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<nav class="nav"><div class="nav-inner">
+    <a class="brand" href="index.html">turnos-wa</a>
+    <a href="capacidades.html">Qué hace</a>
+    <a href="negocio.html">Producto</a>
+    <a class="active" href="tecnica.html">Técnica</a>
+</div></nav>
+<div class="wrap">
+    <h1>Documentación técnica</h1>
+    <p class="lead">Arquitectura, decisiones y mecánica interna del bot de reservas por WhatsApp.</p>
+
+    <h2>1. Visión general</h2>
+    <p>turnos-wa es un SaaS <strong>multi-tenant</strong> que permite a negocios con agenda recibir y
+        administrar reservas <strong>100% por WhatsApp</strong> (Cloud API oficial de Meta), sin app ni
+        panel web para el cliente ni para el dueño. Un único deploy atiende a todos los negocios.</p>
+
+    <h3>Reglas de oro del producto</h3>
+    <ol>
+        <li><strong>El LLM solo interpreta, nunca decide.</strong> Groq (<code>llama-3.1-8b-instant</code>)
+            clasifica la intención y extrae entidades; la disponibilidad, fechas y precios se validan
+            <em>siempre</em> con código determinístico contra PostgreSQL. Elimina alucinaciones en lo
+            transaccional, mantiene el costo en ~$0 y cumple la política de Meta (prohíbe chatbots de
+            propósito general).</li>
+        <li><strong>Toda mutación que afecte a un cliente se confirma.</strong> En modo dueño, los cambios
+            (mover turnos, bloquear, cambiar horario) muestran un <em>preview</em> con botón
+            <em>Confirmar</em> antes de tocar nada.</li>
+        <li><strong>Aislamiento por tenant a nivel base de datos</strong> (Row-Level Security), aun ante
+            bugs de aplicación.</li>
+    </ol>
+
+    <h2>2. Stack y por qué</h2>
+    <table>
+        <tr><th>Pieza</th><th>Elección</th><th>Por qué</th></tr>
+        <tr><td>Backend</td><td>Spring Boot 3 · Java 21 (virtual threads)</td>
+            <td>Stack que el founder domina. Virtual threads → webhook ackea &lt;200ms sin reactive.</td></tr>
+        <tr><td>Base de datos</td><td>PostgreSQL 16</td>
+            <td>RLS multi-tenant + <em>exclusion constraints</em> nativos (anti doble-reserva).</td></tr>
+        <tr><td>Cola / scheduling</td><td>JobRunr (sobre Postgres)</td>
+            <td>Reemplaza Redis+Celery. Jobs async, recurrentes y dashboard. <strong>2 contenedores: app + Postgres.</strong></td></tr>
+        <tr><td>NLU</td><td>Groq Llama 3.1 8B</td><td>Sub-segundo, costo ~$0.00004/conversación.</td></tr>
+        <tr><td>Pagos</td><td>MercadoPago (Checkout Pro)</td><td>Única infra viable en AR. Seña + cobro mensual.</td></tr>
+        <tr><td>Informe</td><td>Apache POI</td><td>Genera el Excel mensual.</td></tr>
+        <tr><td>Panel admin</td><td>Thymeleaf + Spring Security</td><td>Cockpit interno del founder, server-side, sin frontend aparte.</td></tr>
+    </table>
+
+    <h2>3. Arquitectura de mensajes (ack-first, process-later)</h2>
+<pre><code>WhatsApp → POST /webhook (Spring MVC)
+  1. Validar firma HMAC-SHA256 (X-Hub-Signature-256) sobre el body crudo
+  2. Dedup por message_id (INSERT ... ON CONFLICT DO NOTHING — Meta entrega at-least-once)
+  3. Encolar en JobRunr → responder 200 (todo en &lt;200ms)
+
+JobRunr worker (IncomingMessageProcessor):
+  - ConversationLock por (tenant+teléfono): serializa mensajes del mismo chat
+  - Resolver tenant por phone_number_id → abrir contexto RLS
+  - ¿es el número del dueño? → modo dueño : flujo cliente
+  - Texto: normalización rioplatense → NLU (Groq, HTTP fuera de la transacción)
+  - Router por intención → validación determinística → respuesta (texto/botones/lista/imagen/documento)</code></pre>
+    <p>Regla de orden: el acceso a la base va dentro de <code>TenantScope</code> (transacción con RLS);
+        las llamadas HTTP (Groq, Cloud API) van <em>fuera</em> para no retener la conexión durante I/O.</p>
+
+    <h2>4. Multi-tenancy y seguridad (RLS)</h2>
+    <p>Cada negocio es un <em>tenant</em>. El aislamiento es a nivel base: las políticas RLS filtran toda
+        consulta por <code>app.current_tenant</code> (seteado con <code>SET LOCAL</code> por transacción).</p>
+    <div class="card"><strong>Detalle crítico:</strong> RLS no aplica a superusuarios. La app se conecta con
+        un rol dedicado <strong>no superusuario</strong> (<code>app_user</code>) y las tablas usan
+        <code>FORCE ROW LEVEL SECURITY</code>. <em>Fail-closed:</em> una consulta sin contexto ve 0 filas.</div>
+    <ul>
+        <li><code>TenantScope</code> — ejecuta trabajo con el tenant del request seteado. El contexto muere con
+            la transacción (no se filtra entre requests del pool).</li>
+        <li><code>SystemScope</code> — para jobs cross-tenant (recordatorios, informes, cobro): activa
+            <code>app.scan_mode</code> para leer todos los negocios. Solo en jobs, nunca en un request.</li>
+    </ul>
+
+    <h2>5. Modelo de datos (núcleo)</h2>
+    <table>
+        <tr><th>Tabla</th><th>Rol</th></tr>
+        <tr><td><code>tenants</code></td><td>El negocio. Sin RLS (es el lookup previo al contexto). Guarda config (JSONB), credencial MP cifrada, precio mensual y ciclo de cobro.</td></tr>
+        <tr><td><code>industry_templates</code></td><td>Plantillas por rubro (servicios, horarios, tono). Lo "customizable" como datos.</td></tr>
+        <tr><td><code>professionals · services · customers</code></td><td>Recursos del negocio (con RLS).</td></tr>
+        <tr><td><code>appointments</code></td><td>Turnos. <code>tstzrange</code> + <em>exclusion constraint</em> GIST anti-solapamiento. Estados: confirmed / cancelled / no_show / completed. Lleva estado de seña.</td></tr>
+        <tr><td><code>business_hours · schedule_blocks</code></td><td>Horario semanal y bloqueos puntuales.</td></tr>
+        <tr><td><code>conversation_state</code></td><td>Estado del flujo multi-paso por cliente.</td></tr>
+        <tr><td><code>messages</code></td><td>Log de toda la conversación (in/out), para debug y evidencia.</td></tr>
+        <tr><td><code>reminders_sent</code></td><td>Idempotencia del recordatorio 24h.</td></tr>
+        <tr><td><code>message_templates</code></td><td>Catálogo de textos (defaults globales/por rubro). Overrides por negocio en <code>tenants.config.mensajes</code>.</td></tr>
+        <tr><td><code>subscription_invoices</code></td><td>Facturas del cobro mensual del servicio.</td></tr>
+    </table>
+
+    <h3>Anti doble-reserva</h3>
+    <p>El insert del turno es SQL nativo con un <em>exclusion constraint</em> GIST: dos rangos del mismo
+        profesional no pueden solaparse. Es la <strong>única autoridad</strong> sobre la disponibilidad —
+        cero race conditions sin locks de aplicación. El insert va dentro de un <code>SAVEPOINT</code> para
+        que una violación no aborte la transacción y se puedan ofrecer alternativas.</p>
+
+    <h2>6. NLU rioplatense</h2>
+    <p>Dos capas, según la regla de oro:</p>
+    <ul>
+        <li><strong>Determinística (antes del LLM):</strong> <code>TextNormalizer</code> expande
+            abreviaciones ("tngo"→"tengo"); <code>RioplatenseDateParser</code> resuelve fechas/horas
+            ("mañana", "el lunes que viene", "tipo 3"→15:00) a tipos <code>java.time</code> — cero
+            alucinación de fechas.</li>
+        <li><strong>LLM (Groq):</strong> clasifica intención y extrae spans. Tres usos con prompt propio:
+            cliente (reservar/cancelar/consultar/saludo/<strong>agradecimiento</strong>/despedida/…),
+            dueño-reserva (extrae el nombre del cliente) y dueño-horario (varias reglas por mensaje).
+            Ante cualquier falla, fallback seguro.</li>
+    </ul>
+
+    <h2>7. Flujos</h2>
+    <h3>Cliente — <code>BookingFlow</code></h3>
+    <p>Híbrido (texto libre + listas/botones): servicio → día → horario → confirmación. Soporta reserva
+        por hora exacta, captura del nombre antes de confirmar, reprogramación fluida y respuesta a los
+        botones del recordatorio. Si el negocio pide seña, aparta el turno y manda el link de pago.</p>
+    <h3>Dueño — <code>OwnerFlow</code> / <code>OwnerBookingFlow</code> / <code>OwnerHoursFlow</code></h3>
+    <p>Administración 100% por chat: agenda del día, <strong>agenda semanal como imagen PNG</strong>
+        (Java2D), reservar para terceros (con negociación si falta el nombre o el horario está ocupado),
+        bloqueos puntuales, marcar ausencias, informe mensual, activar/desactivar seña y definir el horario
+        en lenguaje natural. Toda mutación: preview + confirmación.</p>
+
+    <h2>8. Pagos</h2>
+    <table>
+        <tr><th></th><th>Seña del cliente</th><th>Cobro mensual del servicio</th></tr>
+        <tr><td>Quién paga</td><td>El cliente, al reservar</td><td>El dueño, mensual</td></tr>
+        <tr><td>A dónde va</td><td>Cuenta del <strong>negocio</strong></td><td>Cuenta del <strong>founder</strong></td></tr>
+        <tr><td>Credencial</td><td><code>tenants.mp_access_token</code> (cifrada)</td><td><code>mercadopago.platform-token</code></td></tr>
+        <tr><td>Mecánica</td><td>Checkout Pro + webhook; libera el turno si no paga en 30 min</td><td>Link mensual + 15 días de gracia + baja automática</td></tr>
+    </table>
+    <p>Ambos usan <code>PaymentGateway.createCheckout</code> (Checkout Pro) y el webhook
+        <code>/webhook/mercadopago</code>, que rutea por <code>?appointment=</code> (seña) vs
+        <code>?invoice=</code> (suscripción) y parsea los varios formatos de notificación de MercadoPago.</p>
+
+    <h2>9. Jobs recurrentes (JobRunr)</h2>
+    <table>
+        <tr><th>Job</th><th>Cadencia</th><th>Qué hace</th></tr>
+        <tr><td><code>recordatorio-24h</code></td><td>cada 15 min</td><td>Manda el template 24h antes (idempotente, respeta opt-in).</td></tr>
+        <tr><td><code>informe-mensual</code></td><td>día 1, 09:00</td><td>Envía el resumen + Excel del mes anterior a cada dueño.</td></tr>
+        <tr><td><code>cobro-mensual</code></td><td>diario, 09:00</td><td>Emite facturas del ciclo vencido y da de baja por falta de pago.</td></tr>
+    </table>
+
+    <h2>10. Catálogo de textos y panel de admin</h2>
+    <p>Los textos de cara al cliente viven como <strong>datos</strong>, no código:
+        <code>Messages.get(tenant, clave, vars)</code> resuelve override del negocio → default del rubro →
+        default global → fallback. Cambiar un texto no requiere recompilar.</p>
+    <p>El <strong>panel de admin</strong> del founder (<code>/admin</code>, Thymeleaf + login) da de alta
+        negocios (siembra servicios y horario desde la plantilla), conecta MercadoPago, activa la seña,
+        edita los textos del catálogo y maneja el cobro mensual.</p>
+
+    <h2>11. Hardening</h2>
+    <ul>
+        <li><strong>Cifrado en reposo</strong> de credenciales (MercadoPago) con AES-256-GCM; clave por
+            <code>ENCRYPTION_KEY</code>. Un migrador cifra al arranque lo que estuviera en texto plano.</li>
+        <li><strong>Backups</strong>: servicio aparte que hace <code>pg_dump</code> diario (conserva 14),
+            independiente de la salud de la app.</li>
+        <li><strong>/docs</strong> cerrable en producción (<code>APP_DOCS_PUBLIC=false</code> → pide login).</li>
+    </ul>
+
+    <h2>12. Testing</h2>
+    <p>~89 tests de integración contra <strong>PostgreSQL real</strong> (Testcontainers): RLS, anti
+        doble-reserva, disponibilidad, flujos, recordatorios, ausencias, informe, seña, cobro, cifrado,
+        catálogo y panel. Pagos con gateway mockeado + E2E real de la seña con el sandbox de MercadoPago.</p>
+
+    <h2>13. Deuda técnica / próximos pasos</h2>
+    <ul>
+        <li>Rate-limiting y monitoreo/alertas <strong>por tenant</strong> (Fase 2).</li>
+        <li>El lock de conversación es in-memory (un nodo). Multi-nodo → lock distribuido (advisory lock de Postgres).</li>
+        <li>Backups locales → replicar a object storage externo (B2/R2) y testear restore.</li>
+        <li>Mensajes al dueño fuera de la ventana de 24h (cobro mensual) → requieren template utility en prod.</li>
+        <li>Embedded Signup de Meta para onboarding self-service (Fase 2).</li>
+    </ul>
+</div>
+</body>
+</html>
