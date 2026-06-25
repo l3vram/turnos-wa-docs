@@ -85,8 +85,12 @@ JobRunr worker (IncomingMessageProcessor):
         <tr><td><code>tenants</code></td><td>El negocio. Sin RLS (es el lookup previo al contexto). Guarda config (JSONB), credencial MP cifrada, precio mensual y ciclo de cobro.</td></tr>
         <tr><td><code>industry_templates</code></td><td>Plantillas por rubro (servicios, horarios, tono). Lo "customizable" como datos.</td></tr>
         <tr><td><code>professionals · services · customers</code></td><td>Recursos del negocio (con RLS).</td></tr>
-        <tr><td><code>appointments</code></td><td>Turnos. <code>tstzrange</code> + <em>exclusion constraint</em> GIST anti-solapamiento. Estados: confirmed / cancelled / no_show / completed. Lleva estado de seña.</td></tr>
+        <tr><td><code>appointments</code></td><td>Turnos. <code>tstzrange</code> + <em>exclusion constraint</em> GIST anti-solapamiento (sólo para turnos exclusivos, ver más abajo). Estados: confirmed / cancelled / no_show / completed. Lleva estado de seña y bandera <code>exclusivo</code>.</td></tr>
+        <tr><td><code>services</code></td><td>Servicios del negocio. <code>capacidad</code> = cupos por horario (1 = individual, &gt;1 = clase grupal).</td></tr>
+        <tr><td><code>customers</code></td><td>Clientes (con RLS). <code>blocked</code> veta a un cliente problemático.</td></tr>
         <tr><td><code>business_hours · schedule_blocks</code></td><td>Horario semanal y bloqueos puntuales.</td></tr>
+        <tr><td><code>waitlist</code></td><td>Lista de espera: a quién avisar (FIFO) cuando se libera un turno de un servicio.</td></tr>
+        <tr><td><code>packs · customer_packs</code></td><td>Catálogo de bonos del negocio y bonos comprados por cada cliente (sesiones totales/usadas, activación por pago).</td></tr>
         <tr><td><code>conversation_state</code></td><td>Estado del flujo multi-paso por cliente.</td></tr>
         <tr><td><code>messages</code></td><td>Log de toda la conversación (in/out), para debug y evidencia.</td></tr>
         <tr><td><code>reminders_sent</code></td><td>Idempotencia del recordatorio 24h.</td></tr>
@@ -94,11 +98,21 @@ JobRunr worker (IncomingMessageProcessor):
         <tr><td><code>subscription_invoices</code></td><td>Facturas del cobro mensual del servicio.</td></tr>
     </table>
 
-    <h3>Anti doble-reserva</h3>
+    <h3>Anti doble-reserva (y cupos múltiples)</h3>
     <p>El insert del turno es SQL nativo con un <em>exclusion constraint</em> GIST: dos rangos del mismo
         profesional no pueden solaparse. Es la <strong>única autoridad</strong> sobre la disponibilidad —
         cero race conditions sin locks de aplicación. El insert va dentro de un <code>SAVEPOINT</code> para
         que una violación no aborte la transacción y se puedan ofrecer alternativas.</p>
+    <p>Para <strong>clases con cupo</strong> (servicios con <code>capacidad &gt; 1</code>) el constraint se
+        aplica sólo a los turnos <code>exclusivo</code>, así varios conviven en el mismo horario. El cupo se
+        controla con un <em>advisory lock</em> por slot (<code>pg_advisory_xact_lock</code>) que serializa las
+        reservas concurrentes del mismo horario sin pasarse de la capacidad.</p>
+
+    <h3>Agenda web (único surface web)</h3>
+    <p>El dueño abre su agenda en el navegador con un <strong>magic-link</strong>: un token firmado con
+        HMAC-SHA256 que lleva el tenant y un vencimiento (24h), <em>sin tocar la DB</em>. La página es de
+        <strong>solo lectura</strong>; toda operación sigue siendo por WhatsApp. Es la única superficie web del
+        lado del negocio.</p>
 
     <h2>6. NLU rioplatense</h2>
     <p>Dos capas, según la regla de oro:</p>
