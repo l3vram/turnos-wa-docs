@@ -28,3 +28,43 @@ th { background: #f2f4f6; }
 .muted { color: var(--muted); } small { color: var(--muted); }
 ul { padding-left: 1.2rem; } li { margin: .2rem 0; }
 @media (max-width: 640px) { .hub { grid-template-columns: 1fr; } }
+
+/* ───────── Landing (clientes) ───────── */
+.hero { text-align: center; padding: 2.5rem 0 1rem; }
+.hero h1 { font-size: 2.3rem; line-height: 1.15; margin: 0 0 .6rem; }
+.hero h1 .hl { color: var(--verde); }
+.hero .sub { color: var(--muted); font-size: 1.15rem; max-width: 620px; margin: 0 auto 1.5rem; }
+.cta-row { display: flex; gap: .8rem; justify-content: center; flex-wrap: wrap; }
+.btn { display: inline-block; background: var(--verde); color: #fff; text-decoration: none; font-weight: 700;
+    padding: .7rem 1.4rem; border-radius: 8px; font-size: 1rem; }
+.btn:hover { background: #256628; }
+.btn-ghost { background: #fff; color: var(--verde); border: 1.5px solid var(--verde); }
+.btn-ghost:hover { background: #f0f7f0; }
+.tag { display:inline-block; background:#e9f5ea; color:var(--verde); font-weight:700; font-size:.8rem;
+    padding:.25rem .7rem; border-radius:20px; margin-bottom:1rem; }
+
+/* mockup de chat */
+.chat { max-width: 360px; margin: 2rem auto 0; background: #efeae2; border-radius: 16px;
+    padding: 1rem; box-shadow: 0 8px 30px rgba(0,0,0,.08); }
+.chat .hd { font-weight:700; font-size:.85rem; color:#075e54; margin-bottom:.7rem; }
+.bubble { max-width: 80%; padding: .5rem .75rem; border-radius: 10px; margin: .35rem 0; font-size: .9rem;
+    background: #fff; clear: both; float: left; box-shadow: 0 1px 1px rgba(0,0,0,.06); }
+.bubble.me { background: #d9fdd3; float: right; }
+.chat::after { content:""; display:block; clear:both; }
+
+.section { padding-top: 1rem; }
+.center { text-align: center; }
+.steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-top: 1.2rem; }
+.step .num { width: 34px; height: 34px; border-radius: 50%; background: var(--verde); color:#fff;
+    font-weight:800; display:flex; align-items:center; justify-content:center; margin-bottom:.5rem; }
+.features { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.2rem; }
+.feat { border:1px solid var(--linea); border-radius:10px; padding:1rem 1.2rem; background:#fff; }
+.feat h3 { margin:.1rem 0 .3rem; color: var(--tinta); }
+.feat p { margin:0; color: var(--muted); font-size:.92rem; }
+.faq details { border:1px solid var(--linea); border-radius:8px; padding:.6rem 1rem; margin:.5rem 0; background:#fff; }
+.faq summary { font-weight:700; cursor:pointer; }
+.faq p { color: var(--muted); margin:.5rem 0 0; }
+.band { background:#f0f7f0; border-radius:14px; padding:2rem 1.5rem; text-align:center; margin-top:2.5rem; }
+.foot { border-top:1px solid var(--linea); margin-top:3rem; padding-top:1.5rem; color:var(--muted); font-size:.85rem; }
+.foot a { color: var(--verde); }
+@media (max-width:640px){ .steps,.features{ grid-template-columns:1fr; } .hero h1{ font-size:1.8rem; } }

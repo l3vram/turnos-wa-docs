@@ -3,46 +3,149 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>turnos-wa · Documentación</title>
-    <meta name="description" content="turnos-wa: bot de reservas y turnos por WhatsApp para peluquerías, barberías y estética. Documentación funcional, técnica y de producto."/>
+    <title>turnos-wa · Reservá turnos por WhatsApp, sin apps ni planillas</title>
+    <meta name="description" content="turnos-wa es el asistente que toma los turnos de tu negocio por WhatsApp: tus clientes reservan solos, con recordatorios, seña anti-ausencias, lista de espera y más. Para peluquerías, barberías y centros de estética en Argentina."/>
+    <meta property="og:title" content="turnos-wa · Turnos por WhatsApp"/>
+    <meta property="og:description" content="Tus clientes reservan solos por WhatsApp. Vos manejás la agenda desde el mismo chat."/>
     <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
 <nav class="nav"><div class="nav-inner">
     <a class="brand" href="index.html">turnos-wa</a>
-    <a href="capacidades.html">Qué hace</a>
-    <a href="negocio.html">Producto</a>
-    <a href="tecnica.html">Técnica</a>
+    <a href="#como">Cómo funciona</a>
+    <a href="#funciones">Funciones</a>
+    <a href="#precio">Precio</a>
+    <a href="#contacto">Contacto</a>
+    <a href="capacidades.html">Qué hace en detalle</a>
 </div></nav>
+
 <div class="wrap">
-    <h1>turnos-wa</h1>
-    <p class="lead">Asistente de <strong>reservas y turnos por WhatsApp</strong> para negocios con agenda
-        (peluquerías, barberías, estética). Tus clientes reservan solos por WhatsApp y vos manejás toda tu
-        agenda desde el mismo WhatsApp — sin apps, sin paneles, sin contraseñas.</p>
 
-    <div class="hub">
-        <a href="capacidades.html"><div class="card">
-            <h3>✅ Qué hace (y qué no)</h3>
-            <p class="muted">El panorama claro de capacidades: lo que el bot resuelve hoy y lo que todavía
-                no cubre. Ideal para evaluar si encaja con tu negocio.</p>
-        </div></a>
-        <a href="negocio.html"><div class="card">
-            <h3>💼 El producto</h3>
-            <p class="muted">El problema que resuelve, la propuesta de valor, cómo se cobra, el estado
-                actual y hacia dónde va.</p>
-        </div></a>
-        <a href="tecnica.html"><div class="card">
-            <h3>🏗️ Documentación técnica</h3>
-            <p class="muted">Para colegas y curiosos: arquitectura, stack, multi-tenancy, modelo de datos,
-                NLU, pagos, seguridad y decisiones de diseño.</p>
-        </div></a>
-        <div class="card">
-            <h3>📩 Contacto</h3>
-            <p class="muted">¿Tenés un negocio con turnos y querés probarlo? Escribime.</p>
+    <!-- HERO -->
+    <header class="hero">
+        <span class="tag">Para peluquerías, barberías y estética 🇦🇷</span>
+        <h1>Tus clientes reservan turnos <span class="hl">por WhatsApp</span>, solos.</h1>
+        <p class="sub">Sin apps que bajar, sin planillas, sin paneles. El asistente atiende el WhatsApp de tu
+            negocio, agenda los turnos y te recuerda quién viene. Vos seguís usando tu WhatsApp normal.</p>
+        <div class="cta-row">
+            <a class="btn" href="#contacto">Quiero probarlo</a>
+            <a class="btn btn-ghost" href="capacidades.html">Ver qué hace</a>
         </div>
-    </div>
 
-    <p style="margin-top:2.5rem"><small>Documentación pública de turnos-wa · proyecto en desarrollo.</small></p>
+        <div class="chat">
+            <div class="hd">💬 Barbería Diego</div>
+            <div class="bubble me">Hola, quiero un corte mañana a la tarde</div>
+            <div class="bubble">¡Hola! 🙌 Mañana tengo 15:00, 16:30 o 18:00. ¿Cuál te queda bien?</div>
+            <div class="bubble me">16:30 👍</div>
+            <div class="bubble">✅ Listo, te esperamos mañana a las 16:30. El día anterior te recuerdo así no se te pasa.</div>
+        </div>
+    </header>
+
+    <!-- PROBLEMA -->
+    <section class="section">
+        <h2 class="center" style="border:none">¿Cansado de coordinar turnos a mano?</h2>
+        <p class="center sub">Mensajes a cualquier hora, ausencias que te dejan el sillón vacío, idas y vueltas
+            para encontrar un horario. turnos-wa se ocupa de todo eso por vos, dentro del WhatsApp que ya usás.</p>
+    </section>
+
+    <!-- CÓMO FUNCIONA -->
+    <section class="section" id="como">
+        <h2>Cómo funciona</h2>
+        <div class="steps">
+            <div class="step"><div class="num">1</div><h3>El cliente escribe</h3>
+                <p class="muted">Le manda un WhatsApp a tu negocio como le hablaría a una persona:
+                    <em>"quiero un corte el sábado"</em>.</p></div>
+            <div class="step"><div class="num">2</div><h3>El bot agenda</h3>
+                <p class="muted">Le ofrece los horarios libres, confirma el turno y lo carga en tu agenda
+                    al instante, sin que vos toques nada.</p></div>
+            <div class="step"><div class="num">3</div><h3>Menos ausencias</h3>
+                <p class="muted">Le manda un recordatorio el día anterior. Si querés, le pedís una seña.
+                    Vos ves todo y, si hace falta, respondés vos mismo.</p></div>
+        </div>
+    </section>
+
+    <!-- FUNCIONES -->
+    <section class="section" id="funciones">
+        <h2>Todo lo que hace</h2>
+        <div class="features">
+            <div class="feat"><h3>📅 Reservas 24/7</h3><p>Tus clientes reservan, cancelan y reprograman
+                solos, a cualquier hora, sin que tengas que contestar.</p></div>
+            <div class="feat"><h3>⏰ Recordatorios</h3><p>Aviso automático el día anterior con botones para
+                confirmar, reprogramar o cancelar. Menos plantones.</p></div>
+            <div class="feat"><h3>💲 Seña anti-ausencias</h3><p>Si querés, el cliente deja una seña por
+                MercadoPago para reservar. La plata va a tu cuenta.</p></div>
+            <div class="feat"><h3>⏳ Lista de espera</h3><p>Si está completo, anota al cliente y le avisa al
+                instante cuando se libera un lugar.</p></div>
+            <div class="feat"><h3>🎟️ Bonos / packs</h3><p>Vendé paquetes de sesiones (ej. 10 cortes); el bot
+                los cobra y descuenta una en cada visita.</p></div>
+            <div class="feat"><h3>👥 Clases con cupo</h3><p>Para spa, yoga o talleres: varios lugares en el
+                mismo horario, hasta llenar el cupo.</p></div>
+            <div class="feat"><h3>🗓️ Tu agenda, fácil</h3><p>Mirás el día o la semana desde el chat, o abrís
+                tu agenda en el navegador con un link privado.</p></div>
+            <div class="feat"><h3>📊 Informe mensual</h3><p>Cuántos vinieron, cuántos faltaron y tu % de
+                ausentismo, en un Excel, todos los meses.</p></div>
+        </div>
+        <p class="center" style="margin-top:1.2rem">
+            <a class="btn btn-ghost" href="capacidades.html">Ver el detalle de qué hace y qué no →</a></p>
+    </section>
+
+    <!-- PARA QUIÉN -->
+    <section class="section">
+        <h2>¿Es para tu negocio?</h2>
+        <p class="sub">Encaja perfecto si manejás <strong>una agenda de turnos</strong> y coordinás por
+            WhatsApp: peluquerías, barberías, centros de estética, manicura, spa, tatuajes, consultorios y
+            cualquier negocio que dé turnos.</p>
+    </section>
+
+    <!-- PRECIO -->
+    <section class="section" id="precio">
+        <h2>Precio simple</h2>
+        <div class="band">
+            <h3 style="margin-top:0">Probalo 30 días gratis</h3>
+            <p class="muted">Después, un <strong>abono mensual fijo</strong> por negocio. Sin comisión por
+                turno y sin permanencia. Las señas y los bonos que cobrás van directo a tu cuenta de MercadoPago.</p>
+            <p style="margin-top:1rem"><a class="btn" href="#contacto">Empezar la prueba</a></p>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section faq">
+        <h2>Preguntas frecuentes</h2>
+        <details><summary>¿Mis clientes tienen que instalar algo?</summary>
+            <p>No. Usan el WhatsApp que ya tienen. Le escriben al número de tu negocio como a cualquier persona.</p></details>
+        <details><summary>¿Pierdo mi WhatsApp del negocio?</summary>
+            <p>No. El asistente trabaja sobre el WhatsApp de tu negocio y vos podés seguir respondiendo a mano
+                cuando quieras. Si el bot no entiende algo, quedás vos al mando de la conversación.</p></details>
+        <details><summary>¿Necesito una computadora o un panel?</summary>
+            <p>No hace falta. Configurás todo por WhatsApp (horarios, servicios, precios, ausencias). Si querés
+                ver tu agenda en pantalla grande, te damos un link privado de solo lectura.</p></details>
+        <details><summary>¿Cómo cobro las señas?</summary>
+            <p>Con tu propia cuenta de MercadoPago. La plata de las señas y los bonos entra directo a vos, no
+                pasa por nosotros.</p></details>
+    </section>
+
+    <!-- CONTACTO -->
+    <section class="section band" id="contacto">
+        <h2 style="border:none;margin-top:0">¿Querés probarlo en tu negocio?</h2>
+        <p class="muted">Escribinos y te ayudamos a dejarlo andando con tus servicios y horarios.</p>
+        <!-- TODO Marvel: reemplazá estos datos por tu WhatsApp/email reales antes de publicar -->
+        <p class="cta-row" style="margin-top:1rem">
+            <a class="btn" href="https://wa.me/5491100000000" rel="nofollow">Escribir por WhatsApp</a>
+            <a class="btn btn-ghost" href="mailto:tu-email@ejemplo.com">Mandar un email</a>
+        </p>
+    </section>
+
+    <!-- FOOTER (identidad para clientes y verificación de Meta) -->
+    <footer class="foot">
+        <p><strong>turnos-wa</strong> — Asistente de reservas y turnos por WhatsApp para negocios con agenda.
+            Hecho en Argentina 🇦🇷</p>
+        <p>Más información:
+            <a href="capacidades.html">Qué hace</a> ·
+            <a href="negocio.html">El producto</a> ·
+            <a href="tecnica.html">Documentación técnica</a></p>
+        <p><small>© 2026 turnos-wa · Contacto: <!-- TODO: tu email/WhatsApp real --> tu-email@ejemplo.com</small></p>
+    </footer>
+
 </div>
 </body>
 </html>
